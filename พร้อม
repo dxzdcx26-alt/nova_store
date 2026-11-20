@@ -1,0 +1,411 @@
+จัดให้ครับ นี่คือ Prompt สำหรับส่งให้ AI Coding Agent เพื่อพัฒนาระบบ **HYBRID MULTI-PROVIDER PREMIUM APP STORE** แบบ Production-Ready โดยเน้นระบบขายอัตโนมัติ เชื่อมต่อ BYShop + GafiwShop และมีระบบสำรองค่ายอัตโนมัติ
+
+# MASTER PROMPT — HYBRID MULTI-PROVIDER PREMIUM APP STORE
+
+## Production-Ready | BYShop + GafiwShop | Auto-Failover | Auto-Pricing
+
+คุณคือ Senior Full-Stack Developer, System Architect และ API Integration Engineer มีหน้าที่พัฒนาระบบร้านขายแอปพลิเคชันพรีเมียมแบบอัตโนมัติ โดยต่อยอดจาก Source Code และโครงสร้างโปรเจกต์เดิม
+
+เป้าหมายคือสร้างระบบจำหน่ายสินค้า Digital Premium ผ่านผู้ให้บริการ API ภายนอก 2 ราย ได้แก่ BYShop และ GafiwShop โดยระบบต้องจัดการสินค้า ราคา สต็อก คำสั่งซื้อ การส่งสินค้า OTP และการเคลมประกันได้อย่างครบวงจร
+
+---
+
+# 1. HYBRID MULTI-PROVIDER SYSTEM
+
+พัฒนาระบบเชื่อมต่อผู้ให้บริการหลายค่าย
+
+Providers:
+
+- BYShop API
+- GafiwShop API
+
+ความสามารถ:
+
+- เชื่อมต่อ API ของทั้งสองผู้ให้บริการ
+- ดึงรายการสินค้าอัตโนมัติ
+- ดึงราคาทุนและจำนวนสต็อก
+- ซิงก์ข้อมูลสินค้าเป็นระยะ
+- ตรวจสอบสถานะ API และความพร้อมให้บริการ
+- จัดเก็บข้อมูลแยกตาม Provider
+- รองรับการเพิ่ม Provider ใหม่ในอนาคต
+
+ต้องสร้าง Provider Adapter แยกแต่ละค่าย เพื่อไม่ให้โค้ดของผู้ให้บริการผูกติดกัน
+
+# 2. AUTO-FAILOVER SYSTEM
+
+ระบบสลับผู้ให้บริการอัตโนมัติ
+
+Workflow:
+
+1. ลูกค้าสั่งซื้อสินค้า
+2. ระบบตรวจสอบสต็อกและราคาจาก Provider หลัก
+3. หาก Provider หลักมีสินค้าพร้อมส่ง ให้ดำเนินการสั่งซื้อ
+4. หากสินค้าหมด API Timeout หรือ Provider ขัดข้อง ให้ตรวจสอบ Provider สำรอง
+5. เปรียบเทียบราคาและสต็อก
+6. เลือก Provider ที่ผ่านเงื่อนไขการขาย
+7. ส่งคำสั่งซื้อไปยัง Provider ที่เลือก
+8. ตรวจสอบผลการสั่งซื้อ
+9. ส่งมอบสินค้าให้ลูกค้า
+10. บันทึกประวัติและ Provider ที่ใช้จริง
+
+ข้อกำหนด:
+
+- รองรับ Retry แบบจำกัดจำนวน
+- ป้องกันการส่งคำสั่งซื้อซ้ำ
+- ใช้ Idempotency Key
+- ป้องกันการหักเงินหรือสั่งซื้อซ้ำเมื่อ API Timeout
+- ตรวจสอบสถานะออเดอร์ก่อน Retry
+- มี Transaction และ Order Lock
+- บันทึกประวัติการ Failover ทุกครั้ง
+
+ห้ามเปลี่ยน Provider โดยไม่ตรวจสอบสถานะคำสั่งซื้อเดิม เพราะอาจทำให้เกิดการซื้อซ้ำ
+
+# 3. AUTO-PRICING ENGINE
+
+ระบบคำนวณราคาขายและกำไรอัตโนมัติ
+
+รองรับ:
+
+- ราคาทุน BYShop
+- ราคาทุน GafiwShop
+- ราคาขายที่ผู้ดูแลกำหนด
+- กำไรขั้นต่ำ
+- กำไรเป็นเปอร์เซ็นต์
+- กำไรเป็นจำนวนเงิน
+- ค่าธรรมเนียม
+- ค่าความเสี่ยงและต้นทุนเพิ่มเติม
+- การปัดเศษราคาขาย
+
+สูตรพื้นฐาน:
+
+ราคาขายขั้นต่ำ = ราคาทุน + ค่าใช้จ่ายทั้งหมด + กำไรขั้นต่ำ
+
+ระบบต้อง:
+
+- ตรวจสอบต้นทุนก่อนรับคำสั่งซื้อ
+- คำนวณต้นทุนจาก Provider ที่จะใช้ส่งจริง
+- ป้องกันการขายต่ำกว่าราคาขั้นต่ำ
+- ห้ามขายหากไม่สามารถทำกำไรตามเงื่อนไข
+- รองรับการกำหนดราคาแยกตามสินค้า
+- รองรับการกำหนดราคาแยกตาม Provider
+- แจ้งเตือนเมื่อราคาทุนเปลี่ยนแปลง
+
+ห้ามรับประกันว่าระบบจะไม่ขาดทุน 100% แต่ต้องมีระบบป้องกันและตรวจสอบความเสี่ยงก่อนทำรายการทุกครั้ง
+
+# 4. SMART PRODUCT INVENTORY
+
+ระบบจัดการสินค้าและสต็อกอัจฉริยะ
+
+ความสามารถ:
+
+- ดึงสินค้าอัตโนมัติจากทั้งสอง Provider
+- รวมสินค้าที่เป็นรายการเดียวกัน
+- จัดการรหัสสินค้าและ Provider SKU
+- ตรวจสอบสต็อกแบบ Real-time เท่าที่ API รองรับ
+- แสดงสถานะพร้อมจำหน่าย
+- แสดงสินค้าพร้อมส่งก่อนสินค้าหมด
+- ซ่อนสินค้าที่ไม่พร้อมจำหน่ายได้
+- ตรวจสอบสินค้าและราคาอย่างต่อเนื่อง
+
+การเรียงสินค้า:
+
+1. สินค้าพร้อมส่ง
+2. สินค้าที่มีสต็อกสำรอง
+3. สินค้ารอเติมสต็อก
+4. สินค้าที่ไม่พร้อมจำหน่าย
+
+# 5. OTP REQUEST SYSTEM
+
+ระบบขอรับ OTP ผ่านหน้าเว็บไซต์
+
+ลูกค้าสามารถ:
+
+- เข้าสู่หน้ารายละเอียดคำสั่งซื้อ
+- เลือกคำสั่งซื้อที่รองรับ OTP
+- กดขอรับ OTP
+- ตรวจสอบสถานะการขอ OTP
+- แสดงรหัส OTP เมื่อ Provider ส่งกลับมา
+- ตรวจสอบประวัติ OTP
+- แจ้งเตือนเมื่อได้รับ OTP
+
+ข้อกำหนด:
+
+- ตรวจสอบสิทธิ์เจ้าของคำสั่งซื้อ
+- จำกัดจำนวนครั้งในการร้องขอ
+- มี Cooldown
+- ป้องกันการเรียก API ซ้ำ
+- บันทึก Log
+- ไม่เปิดเผย OTP ให้บุคคลอื่น
+- รองรับการหมดอายุของ OTP
+
+ต้องใช้เฉพาะ API และสิทธิ์ที่ผู้ให้บริการอนุญาต
+
+# 6. WARRANTY & CLAIM SYSTEM
+
+ระบบเคลมประกันสินค้าอัตโนมัติ
+
+ลูกค้าสามารถ:
+
+- ตรวจสอบระยะเวลาประกัน
+- ตรวจสอบสถานะประกัน
+- ส่งคำร้องเคลม
+- ระบุสาเหตุการเคลม
+- แนบหลักฐาน
+- ติดตามสถานะคำร้อง
+- รับสินค้าใหม่หรือรหัสใหม่เมื่อ Provider อนุมัติ
+
+สถานะคำร้อง:
+
+- Pending
+- Reviewing
+- Approved
+- Rejected
+- Processing
+- Completed
+
+ระบบต้องตรวจสอบ:
+
+- วันหมดประกัน
+- ประวัติการเคลม
+- เงื่อนไขของ Provider
+- สิทธิ์การเคลม
+- ป้องกันการเคลมซ้ำ
+
+รองรับทั้งการเคลมอัตโนมัติผ่าน API และการตรวจสอบโดย Admin ตามความสามารถของแต่ละ Provider
+
+# 7. TEST PRODUCT FILTER
+
+ระบบกรองสินค้าทดสอบ API
+
+ข้อกำหนด:
+
+- ตรวจจับสินค้าทดสอบจาก SKU, ชื่อสินค้า และ Metadata
+- รองรับการกำหนด Keyword
+- รองรับการกำหนด SKU ที่ต้องซ่อน
+- ซ่อนสินค้าทดสอบจากหน้าร้าน
+- แสดงสินค้าทดสอบเฉพาะ Admin
+- แสดง Badge TEST ในหน้า Admin
+- ป้องกันไม่ให้สินค้าทดสอบถูกสั่งซื้อจากลูกค้าทั่วไป
+
+ต้องสามารถตั้งค่าเปิด/ปิดระบบกรองได้จาก Dashboard
+
+# 8. ADMIN DASHBOARD
+
+สร้าง Dashboard สำหรับผู้ดูแลระบบ
+
+เมนู:
+
+- Overview
+- Products Management
+- Provider Management
+- Stock Management
+- Orders Management
+- Auto-Pricing
+- OTP Management
+- Warranty & Claims
+- Customer Management
+- API Logs
+- Failover Logs
+- System Settings
+
+ข้อมูลที่แสดง:
+
+- ยอดขายทั้งหมด
+- จำนวนคำสั่งซื้อ
+- กำไรโดยประมาณ
+- สินค้าพร้อมขาย
+- สินค้าหมด
+- Provider ที่ออนไลน์
+- Provider ที่มีปัญหา
+- จำนวนออเดอร์ที่ Failover
+- รายการเคลมที่รอดำเนินการ
+
+# 9. PROVIDER MANAGEMENT
+
+ผู้ดูแลสามารถ:
+
+- เพิ่มและแก้ไข Provider
+- ตั้งค่า API Endpoint
+- ตั้งค่า API Key
+- กำหนด Provider หลัก
+- กำหนด Provider สำรอง
+- เปิด/ปิด Provider
+- กำหนด Priority
+- ตั้งค่า Timeout
+- กำหนด Retry Policy
+- ทดสอบการเชื่อมต่อ API
+
+API Key ต้องจัดเก็บอย่างปลอดภัยในฝั่ง Server เท่านั้น ห้ามส่งไปยัง Frontend
+
+# 10. CUSTOMER STORE
+
+พัฒนาหน้าร้านสำหรับลูกค้า
+
+ประกอบด้วย:
+
+- หน้าแรก
+- หมวดหมู่สินค้า
+- รายการสินค้า
+- ค้นหาสินค้า
+- ตัวกรองสินค้า
+- รายละเอียดสินค้า
+- ระบบสั่งซื้อ
+- ประวัติคำสั่งซื้อ
+- หน้ารับสินค้า
+- หน้า OTP
+- หน้าเคลมประกัน
+- โปรไฟล์สมาชิก
+
+UX/UI:
+
+- Modern Premium Digital Store
+- Responsive ทุกอุปกรณ์
+- รองรับ Mobile และ Desktop
+- โหลดเร็ว
+- ใช้งานง่าย
+- แสดงสถานะสินค้าและออเดอร์แบบชัดเจน
+
+# 11. SECURITY & RELIABILITY
+
+ต้องมี:
+
+- Authentication
+- Role-Based Access Control
+- Secure API
+- Input Validation
+- Rate Limiting
+- CSRF Protection ตามรูปแบบระบบ
+- SQL Injection Protection
+- XSS Protection
+- Secure Session
+- Audit Logs
+- Error Handling
+- Database Transactions
+- Backup และ Recovery
+
+# 12. DATABASE DESIGN
+
+ออกแบบฐานข้อมูลรองรับตารางอย่างน้อย:
+
+- users
+- roles
+- permissions
+- providers
+- provider_products
+- products
+- product_mappings
+- stock_snapshots
+- pricing_rules
+- orders
+- order_items
+- provider_orders
+- otp_requests
+- warranties
+- warranty_claims
+- transactions
+- api_logs
+- failover_logs
+- audit_logs
+- system_settings
+
+ออกแบบ Foreign Keys, Indexes, Unique Constraints และ Transaction ให้เหมาะสม
+
+# 13. AUTOMATION & BACKGROUND WORKERS
+
+ระบบ Background Jobs:
+
+- Sync Products
+- Sync Stock
+- Update Pricing
+- Provider Health Check
+- Order Status Check
+- OTP Status Check
+- Warranty Status Check
+- Failed Order Recovery
+- API Log Cleanup
+
+ต้องมี Queue และ Job Retry พร้อมระบบป้องกันการทำงานซ้ำ
+
+# 14. DEVELOPMENT REQUIREMENTS
+
+ก่อนพัฒนา:
+
+1. ตรวจสอบ Source Code เดิมทั้งหมด
+2. วิเคราะห์ Framework และ Architecture
+3. ตรวจสอบ Database Schema
+4. ตรวจสอบ API Integration เดิม
+5. ตรวจสอบระบบ Authentication
+6. ตรวจสอบระบบคำสั่งซื้อและชำระเงิน
+7. ทำความเข้าใจ Business Logic เดิม
+
+ห้าม:
+
+- รื้อโปรเจกต์โดยไม่จำเป็น
+- เปลี่ยน Framework โดยไม่ได้รับอนุญาต
+- ลบฟีเจอร์เดิม
+- สร้างระบบจำลองแทนระบบจริง
+- Hardcode API Credentials
+- Mock ผลลัพธ์ API แล้วอ้างว่าเชื่อมต่อสำเร็จ
+
+ต้องพัฒนาต่อจากโครงสร้างเดิมและรักษาความเข้ากันได้ของระบบ
+
+# 15. TESTING & ACCEPTANCE CRITERIA
+
+ต้องทดสอบจริง:
+
+1. ดึงสินค้าจาก BYShop สำเร็จ
+2. ดึงสินค้าจาก GafiwShop สำเร็จ
+3. รวมสินค้าและจับคู่ SKU ได้ถูกต้อง
+4. ซิงก์สต็อกได้
+5. คำนวณราคาขายได้ถูกต้อง
+6. ป้องกันการขายขาดทุนตาม Pricing Rules
+7. สั่งซื้อผ่าน Provider หลักได้
+8. สลับ Provider เมื่อสินค้าหมดได้
+9. สลับ Provider เมื่อ API ขัดข้องได้อย่างปลอดภัย
+10. ป้องกันออเดอร์ซ้ำได้
+11. ลูกค้าขอ OTP ได้
+12. ลูกค้าส่งคำร้องเคลมได้
+13. สินค้าทดสอบไม่แสดงหน้าร้าน
+14. Admin สามารถจัดการ Provider ได้
+15. ระบบแสดง Logs และ Error ได้ถูกต้อง
+
+ทดสอบกรณี API Timeout, Invalid Response, Insufficient Stock, Duplicate Request และ Provider Downtime ด้วย
+
+# 16. FINAL DELIVERABLE
+
+ส่งมอบ:
+
+- Source Code ที่พัฒนาเสร็จ
+- Database Migrations
+- API Integration Modules
+- Provider Adapters
+- Admin Dashboard
+- Customer Store
+- Background Workers
+- Automated Tests
+- Environment Configuration Example
+- Documentation สำหรับติดตั้ง
+- Documentation สำหรับเชื่อมต่อ BYShop และ GafiwShop
+
+ไม่ต้องสร้าง ZIP Package
+
+ให้แก้ไขไฟล์โดยตรงใน Repository หรือ Workspace เดิม
+
+รายงานผลสุดท้าย:
+
+- ฟีเจอร์ที่พัฒนาเสร็จ
+- ไฟล์ที่สร้างและแก้ไข
+- API ที่เชื่อมต่อสำเร็จ
+- ผลการทดสอบ
+- ปัญหาที่ยังเหลือ
+- ขั้นตอนติดตั้งและใช้งาน
+
+**เป้าหมายสุดท้าย:** สร้างระบบ HYBRID MULTI-PROVIDER PREMIUM APP STORE ที่สามารถขายสินค้า Digital ได้จริง เชื่อมต่อ BYShop และ GafiwShop จริง มี Auto-Failover, Auto-Pricing, Stock Sync, OTP และ Warranty Claim ครบวงจร พร้อมใช้งาน Production
+
+### **ข้อกำชับเพิ่มเติมสำหรับ Agent**
+
+**อย่าเพิ่งเริ่มเขียนโค้ดทันที** ให้ตรวจสอบ API Documentation ของ BYShop และ GafiwShop ก่อน โดยเฉพาะความสามารถในการดึงสินค้า เช็กสต็อก สั่งซื้อ รับ OTP และเคลมประกัน เพราะแต่ละค่ายอาจรองรับ API ไม่เหมือนกัน
+
+หาก API ใดไม่รองรับ ให้รายงานข้อจำกัดและออกแบบวิธีทำงานสำรอง ห้ามสร้าง Endpoint ปลอมหรืออ้างว่าฟีเจอร์ทำงานได้จริงโดยยังไม่ได้ทดสอบ
+
+**ผลลัพธ์ที่ต้องการ:** ร้านค้าขายสินค้าได้จาก 2 Provider ในระบบเดียว ลูกค้าสั่งซื้อได้อัตโนมัติ และ Admin ควบคุมทุกอย่างจาก Dashboard เดียว
